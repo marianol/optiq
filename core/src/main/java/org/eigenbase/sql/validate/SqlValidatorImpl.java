@@ -39,6 +39,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import static org.eigenbase.util.Static.RESOURCE;
+
 /**
  * Default implementation of {@link SqlValidator}.
  */
@@ -1402,9 +1404,9 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
             fun.getOperandCountRange().getMin();
         throw newValidationError(
             call,
-            EigenbaseResource.instance().InvalidArgCount.ex(
+            RESOURCE.invalidArgCount(
                 call.getOperator().getName(),
-                expectedArgCount));
+                expectedArgCount).ex());
       }
     }
 
@@ -2554,8 +2556,8 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
     } else if (fractionalSecondPrecisionOutOfRange) {
       throw newValidationError(
           qualifier,
-          EigenbaseResource.instance()
-              .IntervalFractionalSecondPrecisionOutOfRange.ex(
+          //CHECKSTYLE: IGNORE 1
+          EigenbaseResource.instance().IntervalFractionalSecondPrecisionOutOfRange.ex(
                   Integer.toString(qualifier.getFractionalSecondPrecision()),
                   "INTERVAL " + qualifier.toString()));
     }
@@ -2638,8 +2640,8 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
         if (!SqlTypeUtil.isComparable(leftColType, rightColType)) {
           throw newValidationError(
               id,
-              EigenbaseResource.instance()
-                  .NaturalOrUsingColumnNotCompatible.ex(id.getSimple(),
+              //CHECKSTYLE: IGNORE 1
+              EigenbaseResource.instance().NaturalOrUsingColumnNotCompatible.ex(id.getSimple(),
                       leftColType.toString(),
                       rightColType.toString()));
         }
@@ -2676,8 +2678,7 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
         if (!SqlTypeUtil.isComparable(leftColType, rightColType)) {
           throw newValidationError(
               join,
-              EigenbaseResource.instance()
-                  .NaturalOrUsingColumnNotCompatible.ex(
+              EigenbaseResource.instance().NaturalOrUsingColumnNotCompatible.ex(
                       name,
                       leftColType.toString(),
                       rightColType.toString()));
@@ -2727,13 +2728,12 @@ public class SqlValidatorImpl implements SqlValidatorWithHints {
       if (SqlUtil.isCallTo(agg, SqlStdOperatorTable.OVER)) {
         throw newValidationError(
             agg,
-            EigenbaseResource.instance()
-                .WindowedAggregateIllegalInClause.ex(clause));
+            //CHECKSTYLE: IGNORE 1
+            EigenbaseResource.instance().WindowedAggregateIllegalInClause.ex(clause));
       } else {
         throw newValidationError(
             agg,
-            EigenbaseResource.instance().AggregateIllegalInClause.ex(
-                clause));
+            EigenbaseResource.instance().AggregateIllegalInClause.ex(clause));
       }
     }
   }

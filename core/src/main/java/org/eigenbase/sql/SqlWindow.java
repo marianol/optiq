@@ -285,15 +285,14 @@ public class SqlWindow extends SqlCall {
           if (upperOp == PRECEDING_OPERATOR) {
             throw validator.newValidationError(
                 upperBound,
-                EigenbaseResource.instance()
-                    .FollowingBeforePrecedingError.ex());
+                //CHECKSTYLE: IGNORE 1
+                EigenbaseResource.instance().FollowingBeforePrecedingError.ex());
           }
         } else if (null != upperLitType) {
           if (Bound.CURRENT_ROW == upperLitType) {
             throw validator.newValidationError(
                 upperBound,
-                EigenbaseResource.instance()
-                    .CurrentRowFollowingError.ex());
+                EigenbaseResource.instance().CurrentRowFollowingError.ex());
           }
         }
       }
@@ -307,8 +306,8 @@ public class SqlWindow extends SqlCall {
     if (offsetAndRange == null) {
       throw validator.newValidationError(
           window,
-          EigenbaseResource.instance()
-              .UnboundedFollowingWindowNotSupported.ex());
+          //CHECKSTYLE: IGNORE 1
+          EigenbaseResource.instance().UnboundedFollowingWindowNotSupported.ex());
     }
     if (offsetAndRange.range < 0) {
       throw validator.newValidationError(
@@ -762,14 +761,12 @@ public class SqlWindow extends SqlCall {
             // true == throw if not exact (we just tested that - right?)
             throw validator.newValidationError(
                 boundVal,
-                EigenbaseResource.instance()
-                    .RowMustBeNonNegativeIntegral.ex());
+                EigenbaseResource.instance().RowMustBeNonNegativeIntegral.ex());
           }
         } else {
           throw validator.newValidationError(
               boundVal,
-              EigenbaseResource.instance()
-                  .RowMustBeNonNegativeIntegral.ex());
+              EigenbaseResource.instance().RowMustBeNonNegativeIntegral.ex());
         }
       }
 
@@ -801,8 +798,7 @@ public class SqlWindow extends SqlCall {
         default:
           throw validator.newValidationError(
               boundVal,
-              EigenbaseResource.instance()
-                  .OrderByDataTypeProhibitsRange.ex());
+              EigenbaseResource.instance().OrderByDataTypeProhibitsRange.ex());
         }
       }
       break;

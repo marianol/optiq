@@ -27,6 +27,8 @@ import org.eigenbase.sql.util.*;
 import org.eigenbase.sql.validate.*;
 import org.eigenbase.util.*;
 
+import static org.eigenbase.util.Static.RESOURCE;
+
 /**
  * A <code>SqlOperator</code> is a type of node in a SQL parse tree (it is NOT a
  * node in a SQL parse tree). It includes functions, operators such as '=', and
@@ -549,9 +551,9 @@ public abstract class SqlOperator {
     if (od.getMin() == od.getMax()) {
       throw validator.newValidationError(
           call,
-          EigenbaseResource.instance().InvalidArgCount.ex(
+          RESOURCE.invalidArgCount(
               call.getOperator().getName(),
-              od.getMin()));
+              od.getMin()).ex());
     } else {
       throw validator.newValidationError(
           call,
