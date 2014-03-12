@@ -25,8 +25,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
+
+import org.eigenbase.util.EigenbaseContextException;
+import org.eigenbase.util.Util;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Defining wrapper classes around resources that allow the compiler to check
@@ -58,7 +62,7 @@ public class Resources {
   /** Resource instance. It contains the resource method (which
      * serves to identify the resource), the locale with which we
      * expect to render the resource, and any arguments. */
-  static class Inst {
+  public static class Inst {
     private final Locale locale;
     protected final Method method;
     protected final Object[] args;
@@ -67,6 +71,19 @@ public class Resources {
       this.method = method;
       this.args = args;
       this.locale = locale;
+    }
+
+    @Override public boolean equals(Object obj) {
+      return this == obj
+          || obj != null
+          && obj.getClass() == this.getClass()
+          && locale == ((Inst) obj).locale
+          && method == ((Inst) obj).method
+          && Arrays.equals(args, ((Inst) obj).args);
+    }
+
+    @Override public int hashCode() {
+      return Util.hashV(locale, method, Arrays.asList(args));
     }
 
     public ResourceBundle bundle() {
@@ -87,6 +104,8 @@ public class Resources {
       //  exception,
       //  and has constructor(String) and constructor(String, Throwable); and
       //  try creating an exception; and check that ExceptionClass is specified
+      // TODO: check that each resource in the bundle is used by precisely
+      //  one method
       final BaseMessage baseMessage = method.getAnnotation(BaseMessage.class);
       return true;
     }
@@ -99,7 +118,13 @@ public class Resources {
     }
 
     public String raw() {
-      return bundle().getString(key());
+      try {
+        return bundle().getString(key());
+      } catch (MissingResourceException e) {
+        // Resource is not in the bundle. (It is probably missing from the
+        // .properties file.) Fall back to the base message.
+        return method.getAnnotation(BaseMessage.class).value();
+      }
     }
 
     private String key() {
@@ -109,6 +134,17 @@ public class Resources {
       } else {
         final String name = method.getName();
         return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+      }
+    }
+
+    public Map<String, String> getProperties() {
+      // At present, annotations allow at most one property per resource. We
+      // could design new annotations if any resource needed more.
+      final Property property = method.getAnnotation(Property.class);
+      if (property == null) {
+        return ImmutableMap.of();
+      } else {
+        return ImmutableMap.of(property.name(), property.value());
       }
     }
   }
@@ -150,6 +186,14 @@ public class Resources {
       final ExceptionClass exceptionClass =
           method.getAnnotation(ExceptionClass.class);
       return exceptionClass.value();
+    }
+  }
+
+  /** SQL language feature. Expressed as the exception that would be
+   * thrown if it were used while disabled. */
+  public static class Feature extends ExInst<EigenbaseContextException> {
+    public Feature(Locale locale, Method method, Object... args) {
+      super(locale, method, args);
     }
   }
 

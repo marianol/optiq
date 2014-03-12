@@ -17,9 +17,6 @@
 */
 package org.eigenbase.resource;
 
-import java.lang.reflect.Method;
-import java.util.Locale;
-
 import org.eigenbase.sql.validate.SqlValidatorException;
 import org.eigenbase.util.EigenbaseContextException;
 import org.eigenbase.util.EigenbaseException;
@@ -30,50 +27,6 @@ import static org.eigenbase.resource.Resources.*;
  * Compiler-checked resources for the Eigenbase project.
  */
 public interface EigenbaseNewResource {
-//  @BaseMessage("BETWEEN operator has no terminating AND")
-//  @ExceptionClass(SqlValidatorException.class)
-//  ExInst<SqlValidatorException> betweenWithoutAnd();
-
-//  @BaseMessage("Invalid number of arguments to function ''{0}''. Was expecting {1,number,#} arguments")
-//  @ExceptionClass(SqlValidatorException.class)
-//  ExInst<SqlValidatorException> invalidArgCount(String a0, int a1);
-
-  /** TODO: throw this away; use a reflective implementation. */
-  abstract static class Impl implements EigenbaseNewResource {
-    public static final EigenbaseNewResource INSTANCE =
-        null; // new Impl(EigenbaseNewResource.class);
-
-    private final Class<EigenbaseNewResource> clazz;
-
-    public Impl(Class<EigenbaseNewResource> clazz) {
-      this.clazz = clazz;
-    }
-
-    public ExInst<SqlValidatorException> betweenWithoutAnd() {
-      final Method method = getMethod("betweenWithoutAnd");
-      return new ExInst<SqlValidatorException>(locale(), method);
-    }
-
-    public ExInst<SqlValidatorException> invalidArgCount(String a0,
-        int a1) {
-      final Method method =
-          getMethod("invalidArgCount", String.class, int.class);
-      return new ExInst<SqlValidatorException>(locale(), method, a0, a1);
-    }
-
-    private static Locale locale() {
-      return EigenbaseResource.getThreadOrDefaultLocale();
-    }
-
-    private Method getMethod(String name, Class... types) {
-      try {
-        return clazz.getMethod(name, types);
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
   @BaseMessage("line {0,number,#}, column {1,number,#}")
   Inst parserContext(int a0, int a1);
 
@@ -159,8 +112,8 @@ public interface EigenbaseNewResource {
   ExInst<EigenbaseException> unicodeEscapeUnexpected();
 
   @BaseMessage("Unicode escape sequence starting at character {0,number,#} is not exactly four hex digits")
-  @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> unicodeEscapeMalformed(int a0);
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> unicodeEscapeMalformed(int a0);
 
   @BaseMessage("No match found for function signature {0}")
   @ExceptionClass(SqlValidatorException.class)
@@ -424,7 +377,7 @@ public interface EigenbaseNewResource {
 
   @BaseMessage("Interval field value {0,number} exceeds precision of {1} field")
   @ExceptionClass(SqlValidatorException.class)
-  ExInst<SqlValidatorException> intervalFieldExceedsPrecision(int a0,
+  ExInst<SqlValidatorException> intervalFieldExceedsPrecision(Number a0,
       String a1);
 
   @BaseMessage("RANGE clause cannot be used with compound ORDER BY clause")
@@ -547,15 +500,15 @@ public interface EigenbaseNewResource {
   @ExceptionClass(SqlValidatorException.class)
   ExInst<SqlValidatorException> cannotUseDisallowPartialWithRange();
 
-  @BaseMessage("Interval leading field precision ''{0}'' out of range for {1}")
+  @BaseMessage("Interval leading field precision ''{0,number,#}'' out of range for {1}")
   @ExceptionClass(SqlValidatorException.class)
-  ExInst<SqlValidatorException> intervalStartPrecisionOutOfRange(String a0,
+  ExInst<SqlValidatorException> intervalStartPrecisionOutOfRange(int a0,
       String a1);
 
-  @BaseMessage("Interval fractional second precision ''{0}'' out of range for {1}")
+  @BaseMessage("Interval fractional second precision ''{0,number,#}'' out of range for {1}")
   @ExceptionClass(SqlValidatorException.class)
   ExInst<SqlValidatorException> intervalFractionalSecondPrecisionOutOfRange(
-      String a0, String a1);
+      int a0, String a1);
 
   @BaseMessage("Duplicate relation name ''{0}'' in FROM clause")
   @ExceptionClass(SqlValidatorException.class)
@@ -564,6 +517,10 @@ public interface EigenbaseNewResource {
   @BaseMessage("Duplicate column name ''{0}'' in output")
   @ExceptionClass(SqlValidatorException.class)
   ExInst<SqlValidatorException> duplicateColumnName(String a0);
+
+  @BaseMessage("Duplicate name ''{0}'' in column list")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> duplicateNameInColumnList(String a0);
 
   @BaseMessage("Internal error: {0}")
   @ExceptionClass(EigenbaseException.class)
@@ -581,9 +538,9 @@ public interface EigenbaseNewResource {
   @ExceptionClass(EigenbaseException.class)
   ExInst<EigenbaseException> validationError(String a0);
 
-  @BaseMessage("Parser Error: {0}")
+  @BaseMessage("Locale '{0}' in an illegal format")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> parserError(String a0);
+  ExInst<EigenbaseException> illegalLocaleFormat(String a0);
 
   @BaseMessage("Argument to function ''{0}'' must not be NULL")
   @ExceptionClass(SqlValidatorException.class)
@@ -601,10 +558,10 @@ public interface EigenbaseNewResource {
   @ExceptionClass(EigenbaseException.class)
   ExInst<EigenbaseException> invalidBoolean(String a0);
 
-  @BaseMessage("Argument to function ''{0}'' must be a valid precision between ''{1}'' and ''{2}''")
+  @BaseMessage("Argument to function ''{0}'' must be a valid precision between ''{1,number,#}'' and ''{2,number,#}''")
   @ExceptionClass(SqlValidatorException.class)
-  ExInst<SqlValidatorException> argumentMustBeValidPrecision(String a0,
-      String a1, String a2);
+  ExInst<SqlValidatorException> argumentMustBeValidPrecision(String a0, int a1,
+      int a2);
 
   @BaseMessage("''{0}'' is not a valid datetime format")
   @ExceptionClass(EigenbaseException.class)
@@ -625,42 +582,42 @@ public interface EigenbaseNewResource {
   @BaseMessage("SELECT DISTINCT not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_E051_01();
+  Feature sQLFeature_E051_01();
 
   @BaseMessage("EXCEPT not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_E071_03();
+  Feature sQLFeature_E071_03();
 
   @BaseMessage("UPDATE not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_E101_03();
+  Feature sQLFeature_E101_03();
 
   @BaseMessage("Transactions not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_E151();
+  Feature sQLFeature_E151();
 
   @BaseMessage("INTERSECT not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_F302();
+  Feature sQLFeature_F302();
 
   @BaseMessage("MERGE not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_F312();
+  Feature sQLFeature_F312();
 
   @BaseMessage("Basic multiset not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_S271();
+  Feature sQLFeature_S271();
 
   @BaseMessage("TABLESAMPLE not supported")
   @Property(name = "FeatureDefinition", value = "SQL:2003 Part 2 Annex F")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeature_T613();
+  Feature sQLFeature_T613();
 
   @BaseMessage("Execution of a new autocommit statement while a cursor is still open on same connection is not supported")
   @Property(name = "FeatureDefinition", value = "Eigenbase-defined")
@@ -671,7 +628,7 @@ public interface EigenbaseNewResource {
   @BaseMessage("Descending sort (ORDER BY DESC) not supported")
   @Property(name = "FeatureDefinition", value = "Eigenbase-defined")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLConformance_OrderByDesc();
+  Feature sQLConformance_OrderByDesc();
 
   @BaseMessage("Sharing of cached statement plans not supported")
   @Property(name = "FeatureDefinition", value = "Eigenbase-defined")
@@ -681,7 +638,7 @@ public interface EigenbaseNewResource {
   @BaseMessage("TABLESAMPLE SUBSTITUTE not supported")
   @Property(name = "FeatureDefinition", value = "Eigenbase-defined")
   @ExceptionClass(EigenbaseException.class)
-  ExInst<EigenbaseException> sQLFeatureExt_T613_Substitution();
+  Feature sQLFeatureExt_T613_Substitution();
 
   @BaseMessage("Personality does not maintain table''s row count in the catalog")
   @Property(name = "FeatureDefinition", value = "Eigenbase-defined")
@@ -698,5 +655,27 @@ public interface EigenbaseNewResource {
   @ExceptionClass(EigenbaseException.class)
   ExInst<EigenbaseException> personalitySupportsLabels();
 
+  @BaseMessage("Require at least 1 argument")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> requireAtLeastOneArg();
 
+  @BaseMessage("Map requires at least 2 arguments")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> mapRequiresTwoOrMoreArgs();
+
+  @BaseMessage("Map requires an even number of arguments")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> mapRequiresEvenArgCount();
+
+  @BaseMessage("Incompatible types")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> incompatibleTypes();
+
+  @BaseMessage("Number of columns must match number of query columns")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> columnCountMismatch();
+
+  @BaseMessage("Column has duplicate column name ''{0}'' and no column list specified")
+  @ExceptionClass(SqlValidatorException.class)
+  ExInst<SqlValidatorException> duplicateColumnAndNoColumnList(String s);
 }

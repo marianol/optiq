@@ -549,15 +549,10 @@ public abstract class SqlOperator {
       return;
     }
     if (od.getMin() == od.getMax()) {
-      throw validator.newValidationError(
-          call,
-          RESOURCE.invalidArgCount(
-              call.getOperator().getName(),
-              od.getMin()).ex());
+      throw validator.newValidationError(call,
+          RESOURCE.invalidArgCount(call.getOperator().getName(), od.getMin()));
     } else {
-      throw validator.newValidationError(
-          call,
-          EigenbaseResource.instance().WrongNumOfArguments.ex());
+      throw validator.newValidationError(call, RESOURCE.wrongNumOfArguments());
     }
   }
 
